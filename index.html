@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marked — Your favorite places</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Marked home"><span class="brand-mark">M</span> marked</a>
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" title="Switch theme" onclick="const nextTheme=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=nextTheme;localStorage.setItem('marked-theme',nextTheme);this.textContent=nextTheme==='dark'?'☀':'☾';">☾</button>
+          <div class="bookmark-total" id="bookmarkTotal">0 saved</div>
+          <button class="auth-button" id="signInButton" type="button">Sign in with Google</button>
+          <div class="account-menu" id="accountMenu" hidden>
+            <span id="accountName"></span>
+            <button class="sign-out-button" id="signOutButton" type="button">Sign out</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero">
+        <p class="eyebrow">YOUR PERSONAL CORNER OF THE WEB</p>
+        <h1>Keep your favorites<br /><em>close at hand.</em></h1>
+        <p class="intro">Save the sites, tools, and little internet discoveries you want to return to.</p>
+      </section>
+
+      <section class="workspace" aria-label="Bookmarks">
+        <div class="section-heading">
+          <div>
+            <h2>Your collection</h2>
+            <p id="collectionDescription">No bookmarks yet — add your first one.</p>
+          </div>
+          <button class="add-button" id="openModal" type="button" disabled title="Sign in to add bookmarks"><span>+</span> Add bookmark</button>
+        </div>
+
+        <div class="controls">
+          <label class="search-box" for="searchInput"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Search your bookmarks" /></label>
+          <select id="categoryFilter" aria-label="Filter by category"><option>All categories</option><option>Favorites</option><option>Work</option><option>Learning</option><option>Entertainment</option><option>Shopping</option><option>Social</option><option>Other</option></select>
+          <select id="sortSelect" aria-label="Sort bookmarks">
+            <option value="newest">Newest first</option>
+            <option value="az">A–Z</option>
+          </select>
+        </div>
+
+        <p class="reorder-hint" id="reorderHint" hidden>Drag bookmarks to rearrange this category.</p>
+        <div class="bookmark-grid" id="bookmarkGrid"></div>
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">✦</div>
+          <h3>A fresh start</h3>
+          <p>Add the first website to your personal collection.</p>
+          <button class="text-button" id="emptyAdd" type="button" disabled>Add a bookmark <span>→</span></button>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="bookmark-dialog" id="bookmarkDialog">
+      <form class="modal-card" id="bookmarkForm" method="dialog">
+        <div class="modal-header"><div><p class="eyebrow" id="modalEyebrow">NEW BOOKMARK</p><h2 id="modalTitle">Add a favorite</h2></div><button type="button" class="close-button" id="closeModal" aria-label="Close">×</button></div>
+        <label>Name<input id="bookmarkName" name="name" required maxlength="60" autocomplete="off" placeholder="e.g. YouTube" /></label>
+        <div class="site-suggestions" id="siteSuggestions" hidden aria-live="polite"></div>
+        <label>Website address<input id="bookmarkUrl" name="url" required type="url" placeholder="https://www.notion.so" /></label>
+        <label>Category<select id="bookmarkCategory" name="category"><option>Favorites</option><option>Work</option><option>Learning</option><option>Entertainment</option><option>Shopping</option><option>Social</option><option value="Custom">Create your own…</option></select></label>
+        <label id="customCategoryLabel" hidden>Your category name<input id="customCategory" name="customCategory" maxlength="30" placeholder="e.g. Travel" /></label>
+        <label>Logo or symbol <span class="optional">(optional)</span><input id="bookmarkLogo" name="logo" type="url" placeholder="https://example.com/logo.png" /></label>
+        <p class="hint">Paste a direct image link, or leave it blank to use the first letter.</p>
+        <div class="modal-actions"><button class="cancel-button" id="cancelModal" type="button">Cancel</button><button class="save-button" id="saveButton" type="submit">Save bookmark</button></div>
+      </form>
+    </dialog>
+
+    <template id="cardTemplate">
+      <article class="bookmark-card" draggable="true">
+        <a class="card-link" target="_blank" rel="noopener noreferrer">
+          <div class="symbol"></div>
+          <div class="card-copy"><span class="category-tag"></span><h3></h3><p></p></div>
+          <span class="visit-arrow" aria-hidden="true">↗</span>
+        </a>
+        <div class="card-actions"><button class="pin-button" type="button">Pin</button><button class="edit-button" type="button">Edit</button><button class="delete-button" type="button" aria-label="Remove bookmark">×</button></div>
+      </article>
+    </template>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
