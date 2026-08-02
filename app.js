@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   localStorage.setItem('marked-theme', theme);
@@ -9,7 +11,7 @@ function applyTheme(theme) {
 applyTheme(localStorage.getItem('marked-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 document.querySelector('#themeToggle').onclick = () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
 
-const supabase = window.supabase.createClient(window.MARKED_SUPABASE_URL, window.MARKED_SUPABASE_KEY);
+const supabase = createClient(window.MARKED_SUPABASE_URL, window.MARKED_SUPABASE_KEY);
 const grid = document.querySelector('#bookmarkGrid');
 const empty = document.querySelector('#emptyState');
 const dialog = document.querySelector('#bookmarkDialog');
