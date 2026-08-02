@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Marked — Your favorite places</title>
+    <title>Marked — Personal Bookmark Manager to Save and Organize Links</title>
+    <meta name="description" content="Marked is a personal bookmark manager for saving, organizing, pinning, and finding your favorite websites in one private place." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://marked-bookmarks.vercel.app/" />
+    <meta property="og:title" content="Marked — Personal Bookmark Manager" />
+    <meta property="og:description" content="Save, organize, pin, and quickly find your favorite websites." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://marked-bookmarks.vercel.app/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
@@ -28,6 +35,27 @@
         <p class="eyebrow">YOUR PERSONAL CORNER OF THE WEB</p>
         <h1>Keep your favorites<br /><em>close at hand.</em></h1>
         <p class="intro">Save the sites, tools, and little internet discoveries you want to return to.</p>
+      </section>
+
+      <section class="seo-content" aria-labelledby="bookmark-manager-title">
+        <div>
+          <p class="eyebrow">A SIMPLE BOOKMARK MANAGER</p>
+          <h2 id="bookmark-manager-title">Save and organize every important link.</h2>
+        </div>
+        <div class="seo-copy">
+          <p>Marked is a personal bookmark manager that helps you save favorite websites, tools, articles, videos, and online discoveries. Keep every useful link in one organized collection instead of searching through browser tabs.</p>
+          <p>Sign in with Google to create your private bookmark library. Add categories, pin your most-used websites to the top, search quickly, and arrange bookmarks in the order that works for you.</p>
+        </div>
+      </section>
+
+      <section class="how-it-works" aria-labelledby="how-it-works-title">
+        <p class="eyebrow">HOW IT WORKS</p>
+        <h2 id="how-it-works-title">A better way to organize bookmarks.</h2>
+        <div class="steps-grid">
+          <article><span>01</span><h3>Save a website</h3><p>Add a name, web address, category, and optional logo for any useful link.</p></article>
+          <article><span>02</span><h3>Make it yours</h3><p>Create your own categories, search your collection, and pin important bookmarks.</p></article>
+          <article><span>03</span><h3>Find it fast</h3><p>Return to your favorite websites whenever you need them, from any signed-in device.</p></article>
+        </div>
       </section>
 
       <section class="workspace" aria-label="Bookmarks">
@@ -58,6 +86,7 @@
         </div>
       </section>
     </main>
+    <footer class="site-footer">Marked — your personal place for favorite websites.</footer>
 
     <dialog class="bookmark-dialog" id="bookmarkDialog">
       <form class="modal-card" id="bookmarkForm" method="dialog">
@@ -85,5 +114,16 @@
     </template>
     <script src="supabase-config.js"></script>
     <script type="module" src="app.js"></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Marked",
+        "url": "https://marked-bookmarks.vercel.app/",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Web",
+        "description": "A personal bookmark manager to save, organize, pin, and find favorite websites."
+      }
+    </script>
   </body>
 </html>
