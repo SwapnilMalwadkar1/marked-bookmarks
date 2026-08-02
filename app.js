@@ -37,7 +37,7 @@ function setSignedInState() {
   emptyAddButton.disabled = !signedIn;
   document.querySelector('#signInButton').hidden = signedIn;
   document.querySelector('#accountMenu').hidden = !signedIn;
-  if (signedIn) document.querySelector('#accountName').textContent = user.user_metadata?.full_name || user.email || 'Signed in';
+  document.querySelector('#accountName').textContent = signedIn ? (user.user_metadata?.full_name || user.email || 'Signed in') : '';
 }
 
 async function loadBookmarks() {
