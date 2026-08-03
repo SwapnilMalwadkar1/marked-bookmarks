@@ -65,7 +65,10 @@
             <h2>Your collection</h2>
             <p id="collectionDescription">No bookmarks yet — add your first one.</p>
           </div>
-          <button class="add-button" id="openModal" type="button" disabled title="Sign in to add bookmarks"><span>+</span> Add bookmark</button>
+          <div class="collection-actions">
+            <button class="import-button" id="openImport" type="button" disabled title="Sign in to import bookmarks">Import bookmarks</button>
+            <button class="add-button" id="openModal" type="button" disabled title="Sign in to add bookmarks"><span>+</span> Add bookmark</button>
+          </div>
         </div>
 
         <div class="controls">
@@ -100,6 +103,21 @@
         <label>Logo or symbol <span class="optional">(optional)</span><input id="bookmarkLogo" name="logo" type="url" placeholder="https://example.com/logo.png" /></label>
         <p class="hint">Paste a direct image link, or leave it blank to use the first letter.</p>
         <div class="modal-actions"><button class="cancel-button" id="cancelModal" type="button">Cancel</button><button class="save-button" id="saveButton" type="submit">Save bookmark</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="bookmark-dialog" id="importDialog">
+      <form class="modal-card" id="importForm" method="dialog">
+        <div class="modal-header"><div><p class="eyebrow">IMPORT BOOKMARKS</p><h2>Bring your saved links</h2></div><button type="button" class="close-button" id="closeImport" aria-label="Close">×</button></div>
+        <p class="import-intro">Export your bookmarks from Chrome, Edge, Firefox, Safari, or another browser as an HTML file, then choose it below.</p>
+        <label class="file-picker" for="bookmarkFile"><span>Choose bookmark HTML file</span><input id="bookmarkFile" type="file" accept=".html,.htm,text/html" /></label>
+        <p class="hint" id="importStatus">Nothing selected yet.</p>
+        <div id="importOptions" hidden>
+          <label>Default category<input id="importCategory" maxlength="30" value="Imported" placeholder="e.g. Imported" /></label>
+          <label class="checkbox-label"><input id="keepFolders" type="checkbox" checked /> Keep browser folders as categories when available</label>
+          <div class="import-preview" id="importPreview" aria-live="polite"></div>
+        </div>
+        <div class="modal-actions"><button class="cancel-button" id="cancelImport" type="button">Cancel</button><button class="save-button" id="importButton" type="submit" disabled>Import bookmarks</button></div>
       </form>
     </dialog>
 

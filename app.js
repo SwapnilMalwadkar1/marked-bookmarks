@@ -18,6 +18,10 @@ const dialog = document.querySelector('#bookmarkDialog');
 const form = document.querySelector('#bookmarkForm');
 const addButton = document.querySelector('#openModal');
 const emptyAddButton = document.querySelector('#emptyAdd');
+const importDialog = document.querySelector('#importDialog');
+const importForm = document.querySelector('#importForm');
+const importButton = document.querySelector('#importButton');
+let importedBookmarks = [];
 let bookmarks = [];
 let user = null;
 let editingId = null;
@@ -35,6 +39,7 @@ function setSignedInState() {
   const signedIn = Boolean(user);
   addButton.disabled = !signedIn;
   emptyAddButton.disabled = !signedIn;
+  document.querySelector('#openImport').disabled = !signedIn;
   document.querySelector('#signInButton').hidden = signedIn;
   document.querySelector('#accountMenu').hidden = !signedIn;
   document.querySelector('#accountName').textContent = signedIn ? (user.user_metadata?.full_name || user.email || 'Signed in') : '';
@@ -118,6 +123,44 @@ function showSuggestions() {
   const google = document.createElement('a'); google.className = 'suggestion-button google-search-link'; google.href = `https://www.google.com/search?q=${encodeURIComponent(`${typed} official website`)}`; google.target = '_blank'; google.rel = 'noopener noreferrer'; google.innerHTML = `<strong>Search Google for “${typed}”</strong><span>↗</span>`; box.append(google);
 }
 
+function cleanImportedUrl(value) {
+  try { const url = new URL(value); return /^https?:$/.test(url.protocol) ? url.href : null; } catch { return null; }
+}
+
+function categoryForLink(link, fallback) {
+  let node = link.parentElement;
+  while (node) {
+    const heading = [...node.children].find(child => /^H[1-6]$/i.test(child.tagName));
+    if (heading?.textContent.trim()) return heading.textContent.trim().slice(0, 30);
+    node = node.parentElement;
+  }
+  return fallback;
+}
+
+async function readBookmarkFile(file) {
+  const html = await file.text();
+  const documentFromFile = new DOMParser().parseFromString(html, 'text/html');
+  const fallback = document.querySelector('#importCategory').value.trim() || 'Imported';
+  const seen = new Set();
+  importedBookmarks = [...documentFromFile.querySelectorAll('a[href]')].map(link => {
+    const url = cleanImportedUrl(link.getAttribute('href'));
+    const name = link.textContent.trim().replace(/\s+/g, ' ').slice(0, 60) || (url ? host(url) : '');
+    return url && name ? { name, url, folder: categoryForLink(link, fallback) } : null;
+  }).filter(bookmark => bookmark && !seen.has(bookmark.url) && seen.add(bookmark.url));
+  document.querySelector('#importOptions').hidden = !importedBookmarks.length;
+  importButton.disabled = !importedBookmarks.length;
+  document.querySelector('#importStatus').textContent = importedBookmarks.length ? `${importedBookmarks.length} bookmark${importedBookmarks.length === 1 ? '' : 's'} found in ${file.name}.` : 'No valid website bookmarks were found in that file.';
+  document.querySelector('#importPreview').textContent = importedBookmarks.length ? `Ready to import ${importedBookmarks.length} bookmarks. Existing links already in Marked will be skipped.` : '';
+}
+
+function openImportDialog() {
+  if (!user) return;
+  importForm.reset(); importedBookmarks = []; importButton.disabled = true;
+  document.querySelector('#importOptions').hidden = true;
+  document.querySelector('#importStatus').textContent = 'Nothing selected yet.';
+  importDialog.showModal();
+}
+
 async function reorderBookmarks(fromId, toId) {
   const category = document.querySelector('#categoryFilter').value;
   if (!fromId || category === 'All categories') return alert('Choose one category before rearranging bookmarks.');
@@ -140,9 +183,12 @@ document.querySelector('#signInButton').onclick = async () => {
 };
 document.querySelector('#signOutButton').onclick = async () => { await supabase.auth.signOut(); };
 document.querySelector('#openModal').onclick = openDialog; document.querySelector('#emptyAdd').onclick = openDialog;
+document.querySelector('#openImport').onclick = openImportDialog;
 document.querySelector('#closeModal').onclick = () => dialog.close(); document.querySelector('#cancelModal').onclick = () => dialog.close();
+document.querySelector('#closeImport').onclick = () => importDialog.close(); document.querySelector('#cancelImport').onclick = () => importDialog.close();
 document.querySelector('#searchInput').oninput = render; document.querySelector('#categoryFilter').onchange = render; document.querySelector('#sortSelect').onchange = render;
 document.querySelector('#bookmarkName').oninput = showSuggestions; document.querySelector('#bookmarkCategory').onchange = toggleCustomCategory;
+document.querySelector('#bookmarkFile').onchange = event => { const [file] = event.target.files; if (file) readBookmarkFile(file).catch(() => { document.querySelector('#importStatus').textContent = 'That file could not be read. Please choose a bookmark HTML export.'; }); };
 form.addEventListener('submit', async event => {
   event.preventDefault(); if (!user) return;
   const data = new FormData(form); let url = data.get('url').trim(); if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
@@ -151,6 +197,22 @@ form.addEventListener('submit', async event => {
   const request = editingId ? supabase.from('bookmarks').update(details).eq('id', editingId) : supabase.from('bookmarks').insert({ ...details, user_id: user.id });
   const { error } = await request; if (error) return alert(`Could not save bookmark: ${error.message}`);
   dialog.close(); await loadBookmarks();
+});
+
+importForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!user || !importedBookmarks.length) return;
+  importButton.disabled = true; importButton.textContent = 'Importing…';
+  const keepFolders = document.querySelector('#keepFolders').checked;
+  const fallback = document.querySelector('#importCategory').value.trim() || 'Imported';
+  const existingUrls = new Set(bookmarks.map(bookmark => bookmark.url));
+  const records = importedBookmarks.filter(bookmark => !existingUrls.has(bookmark.url)).map(bookmark => ({ name: bookmark.name, url: bookmark.url, category: keepFolders ? bookmark.folder : fallback, user_id: user.id }));
+  if (!records.length) { alert('All of these bookmarks are already in your collection.'); importButton.disabled = false; importButton.textContent = 'Import bookmarks'; return; }
+  const { error } = await supabase.from('bookmarks').insert(records);
+  importButton.disabled = false; importButton.textContent = 'Import bookmarks';
+  if (error) return alert(`Could not import bookmarks: ${error.message}`);
+  importDialog.close(); await loadBookmarks();
+  alert(`${records.length} bookmark${records.length === 1 ? '' : 's'} imported successfully.`);
 });
 
 supabase.auth.onAuthStateChange((_event, session) => { user = session?.user || null; setSignedInState(); loadBookmarks(); });
