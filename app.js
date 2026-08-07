@@ -33,6 +33,7 @@ const knownSites = [
   ['Notion', 'https://www.notion.so'], ['Netflix', 'https://www.netflix.com'], ['Spotify', 'https://open.spotify.com'],
   ['WhatsApp', 'https://web.whatsapp.com'], ['X', 'https://x.com'], ['ChatGPT', 'https://chatgpt.com']
 ];
+const defaultCategories = ['Favorites', 'Work', 'Learning', 'Entertainment', 'Shopping', 'Social'];
 
 function host(url) { try { return new URL(url).hostname.replace('www.', ''); } catch { return url || 'No website address'; } }
 function setSignedInState() {
@@ -59,7 +60,7 @@ async function loadBookmarks() {
 function render() {
   const query = document.querySelector('#searchInput').value.toLowerCase();
   const filter = document.querySelector('#categoryFilter'); const selectedCategory = filter.value;
-  const categories = [...new Set(['All categories', 'Favorites', 'Work', 'Learning', 'Entertainment', 'Shopping', 'Social', ...bookmarks.map(bookmark => bookmark.category).filter(Boolean)])];
+  const categories = ['All categories', ...getBookmarkCategories()];
   filter.replaceChildren(...categories.map(category => { const option = document.createElement('option'); option.textContent = category; return option; }));
   filter.value = categories.includes(selectedCategory) ? selectedCategory : 'All categories';
   const sorted = [...bookmarks].filter(bookmark => ((bookmark.name || 'Untitled bookmark').toLowerCase().includes(query) || host(bookmark.url).includes(query)) && (selectedCategory === 'All categories' || (bookmark.category || 'Favorites') === selectedCategory));
@@ -100,16 +101,31 @@ function render() {
   if (!user) document.querySelector('#collectionDescription').textContent = 'Sign in with Google to save your personal bookmarks.';
 }
 
+function getBookmarkCategories() {
+  return [...new Set([...defaultCategories, ...bookmarks.map(bookmark => bookmark.category?.trim()).filter(Boolean)])];
+}
+
+function populateBookmarkCategoryOptions(selectedCategory = 'Favorites') {
+  const select = document.querySelector('#bookmarkCategory');
+  const categories = getBookmarkCategories();
+  select.replaceChildren(...categories.map(category => {
+    const option = document.createElement('option'); option.value = category; option.textContent = category; return option;
+  }));
+  const customOption = document.createElement('option'); customOption.value = 'Custom'; customOption.textContent = 'Create your own…'; select.append(customOption);
+  select.value = categories.includes(selectedCategory) ? selectedCategory : 'Custom';
+}
+
 function toggleCustomCategory() { const custom = document.querySelector('#bookmarkCategory').value === 'Custom'; document.querySelector('#customCategoryLabel').hidden = !custom; document.querySelector('#customCategory').required = custom; }
 function openDialog(bookmark = null) {
   if (!user) return;
   editingId = bookmark?.id ?? null; form.reset();
+  populateBookmarkCategoryOptions(bookmark?.category || 'Favorites');
   document.querySelector('#modalEyebrow').textContent = bookmark ? 'EDIT BOOKMARK' : 'NEW BOOKMARK';
   document.querySelector('#modalTitle').textContent = bookmark ? 'Update your favorite' : 'Add a favorite';
   document.querySelector('#saveButton').textContent = bookmark ? 'Save changes' : 'Save bookmark';
   if (bookmark) {
     document.querySelector('#bookmarkName').value = bookmark.name || ''; document.querySelector('#bookmarkUrl').value = bookmark.url || '';
-    const known = [...document.querySelector('#bookmarkCategory').options].some(option => option.value === bookmark.category);
+    const known = getBookmarkCategories().includes(bookmark.category);
     document.querySelector('#bookmarkCategory').value = known ? bookmark.category : 'Custom'; document.querySelector('#customCategory').value = known ? '' : bookmark.category || ''; document.querySelector('#bookmarkLogo').value = bookmark.logo || '';
   }
   toggleCustomCategory(); dialog.showModal(); document.querySelector('#bookmarkName').focus();
